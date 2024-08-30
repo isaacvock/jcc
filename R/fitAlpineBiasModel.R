@@ -194,6 +194,19 @@ fitAlpineBiasModel <- function(gtf, bam, organism, genome, genomeVersion,
   geneNames <- names(ebtFit)
   names(geneNames) <- geneNames
 
+  
+  ## Filter out genes not to keep
+  sizes <- lapply(geneNames, function(geneName){
+    s <- sum(width(ebtFit[[geneName]]))
+    return(s)
+  })
+  
+  sizes <- unlist(sizes)
+  sizes <- sizes[sizes > maxSize]
+  geneNames <- names(sizes)
+  
+  ebtFit <- ebtFit[names(ebtFit) %in% geneNames]
+  
   ## Build fragment types for selected genes
   if (verbose) message("Building fragment types...")
   fragtypes <- lapply(geneNames, function(geneName) {
@@ -204,6 +217,8 @@ fitAlpineBiasModel <- function(gtf, bam, organism, genome, genomeVersion,
                            maxsize = maxSize,
                            gc.str = FALSE)
   })
+  
+  names(fragtypes) <- geneNames
 
   ## Define models to fit
   if (verbose) message("Fitting bias model...")
